@@ -11,44 +11,32 @@ require 'src/autoload.php';
  * License    GNU GPL v2 or later
  */
 
-$app = new \Slim\Slim();
-
-$helper = new Slimapi\Database\Helper();
+$app    = new \Slim\Slim();
+$helper = new \Slimapi\Database\Helper();
+$auth   = new \Slimapi\Access\Authenticate($app);
 $db     = $helper->getDb();
 
-$app->get('/', function () use ($app, $db)
+$app->get('/', function () use ($auth)
 {
-	try
+	$auth->isUser();
+});
+
+$app->post('/user/', function () use ($app, $auth)
+{
+
+	if ($auth->isAdmin())
 	{
-		$sql = 'SELECT *
-	        FROM users
-	        WHERE username = :username';
-
-		$query = $db->prepare($sql);
-		$query->execute(
-			array(
-				'username' => $app->request->headers->get('username')
-			)
-		);
-
-		$user = $query->fetch(PDO::FETCH_OBJ);
-
-		if (!$user || !password_verify($app->request->headers->get('password'), $user->password))
+		if($auth->user())
 		{
-			$app->response->setStatus(401);
-			$db = null;
+			$app->response->setStatus(201);
 		}
-		else
-		{
-			$app->response->setStatus(200);
-			echo "Welcome to the Slim API.";
-		}
-
-	} catch (PDOException $e)
-	{
-		$app->response()->setStatus(404);
-		echo '{"error":{"text":' . $e->getMessage() . '}}';
 	}
+
+	if (!$auth->isAdmin())
+	{
+		$app->response->setStatus(400);
+	}
+
 });
 
 $app->run();
