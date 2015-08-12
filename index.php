@@ -1,6 +1,7 @@
 <?php
 require 'vendor/autoload.php';
-require 'src/Slimapi.php';
+require 'src/autoload.php';
+
 /**
  * File       index.php
  * Created    8/12/15 10:42 AM
@@ -12,7 +13,7 @@ require 'src/Slimapi.php';
 
 $app = new \Slim\Slim();
 
-$helper = new Slimapi\Helper();
+$helper = new Slimapi\Database\Helper();
 $db     = $helper->getDb();
 
 $app->get('/', function () use ($app, $db)

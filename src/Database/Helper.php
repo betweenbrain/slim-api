@@ -9,7 +9,7 @@
  * License    GNU GPL v2 or later
  */
 
-namespace Slimapi;
+namespace Slimapi\Database;
 
 class Helper
 {
