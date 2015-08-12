@@ -13,7 +13,7 @@ require 'vendor/autoload.php';
 /**
  * @return PDO
  */
-function getDB()
+function getDb()
 {
 	$dbhost = "localhost";
 	$dbuser = "root";
@@ -22,17 +22,33 @@ function getDB()
 
 	$mysql_conn_string = "mysql:host=$dbhost;dbname=$dbname";
 
+	// Try database connection and die if it fails
 	try
 	{
-		$dbConnection = new PDO($mysql_conn_string, $dbuser, $dbpass);
-		$dbConnection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		$db = new PDO($mysql_conn_string, $dbuser, $dbpass);
+		$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-		return $dbConnection;
 	} catch (PDOException $e)
 	{
-		print "Error!: " . $e->getMessage() . "<br/>";
-		die();
+		die(sprintf('DB connection error: %s', $e->getMessage()));
 	}
+
+	$create = 'CREATE TABLE IF NOT EXISTS `users` ( '
+		. '`id` INTEGER  NOT NULL PRIMARY KEY, '
+		. '`username` VARCHAR(50) NOT NULL, '
+		. '`role` VARCHAR(50) NOT NULL, '
+		. '`password` VARCHAR(255) NULL)';
+
+	try
+	{
+		$db->exec($create);
+	} catch (PDOException $e)
+	{
+		die(sprintf('DB setup error: %s', $e->getMessage()));
+	}
+
+	return $db;
+
 }
 
 $app = new \Slim\Slim();
