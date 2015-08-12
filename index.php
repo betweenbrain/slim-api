@@ -72,11 +72,41 @@ function getDb()
 }
 
 $app = new \Slim\Slim();
+$db  = getDb();
 
-$app->get('/', function () use ($app)
+$app->get('/', function () use ($app, $db)
 {
-	$app->response->setStatus(200);
-	echo "Welcome to the Slim API.";
+	try
+	{
+		$sql = 'SELECT *
+	        FROM users
+	        WHERE username = :username';
+
+		$query = $db->prepare($sql);
+		$query->execute(
+			array(
+				'username' => $app->request->headers->get('username')
+			)
+		);
+
+		$user = $query->fetch(PDO::FETCH_OBJ);
+
+		if (!$user || !password_verify($app->request->headers->get('password'), $user->password))
+		{
+			$app->response->setStatus(401);
+			$db = null;
+		}
+		else
+		{
+			$app->response->setStatus(200);
+			echo "Welcome to the Slim API.";
+		}
+
+	} catch (PDOException $e)
+	{
+		$app->response()->setStatus(404);
+		echo '{"error":{"text":' . $e->getMessage() . '}}';
+	}
 });
 
 $app->run();
