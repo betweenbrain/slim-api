@@ -33,15 +33,35 @@ function getDb()
 		die(sprintf('DB connection error: %s', $e->getMessage()));
 	}
 
+	// Create users table
 	$create = 'CREATE TABLE IF NOT EXISTS `users` ( '
 		. '`id` INTEGER  NOT NULL PRIMARY KEY, '
 		. '`username` VARCHAR(50) NOT NULL, '
 		. '`role` VARCHAR(50) NOT NULL, '
 		. '`password` VARCHAR(255) NULL)';
 
+	// Add admin user
+	$admin = 'INSERT INTO users (username, role, password) '
+		. "VALUES ('admin', 'admin', :pass)";
+
+	// Returns the admin user ID
+	$ifAdmin = 'SELECT id from users
+		WHERE username = \'admin\'';
+
 	try
 	{
 		$db->exec($create);
+
+		$isAdmin = $db->prepare($ifAdmin);
+		$isAdmin->execute();
+
+		// Check if admin user exists before trying to create it again
+		if (!$isAdmin->rowCount())
+		{
+			$admin = $db->prepare($admin);
+			$admin->execute(array('pass' => password_hash('admin', PASSWORD_DEFAULT)));
+		}
+
 	} catch (PDOException $e)
 	{
 		die(sprintf('DB setup error: %s', $e->getMessage()));
