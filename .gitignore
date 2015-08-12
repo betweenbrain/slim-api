@@ -1,2 +1,4 @@
 Vagrantfile
 bootstrap.sh
+.vagrant/*
+composer.lock
