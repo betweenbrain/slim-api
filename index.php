@@ -22,13 +22,16 @@ function getDB()
 
 	$mysql_conn_string = "mysql:host=$dbhost;dbname=$dbname";
 
-	try {
+	try
+	{
 		$dbConnection = new PDO($mysql_conn_string, $dbuser, $dbpass);
 		$dbConnection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
 		return $dbConnection;
-	} catch (PDOException $e) {
-	    print "Error!: " . $e->getMessage() . "<br/>";
-	    die();
+	} catch (PDOException $e)
+	{
+		print "Error!: " . $e->getMessage() . "<br/>";
+		die();
 	}
 }
 
