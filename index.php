@@ -16,27 +16,42 @@ $helper = new \Slimapi\Database\Helper();
 $auth   = new \Slimapi\Access\Authenticate($app);
 $db     = $helper->getDb();
 
-$app->get('/', function () use ($auth)
+// Only authorized users can access these routes
+if ($auth->isUser())
 {
-	$auth->isUser();
-});
-
-$app->post('/user/', function () use ($app, $auth)
-{
-
-	if ($auth->isAdmin())
+	$app->get('/', function () use ($auth)
 	{
-		if($auth->user())
+		$auth->isUser();
+	});
+
+	$app->post('/user/', function () use ($app, $auth)
+	{
+
+		if ($auth->isAdmin())
 		{
-			$app->response->setStatus(201);
+			if ($auth->user())
+			{
+				$app->response->setStatus(201);
+			}
 		}
-	}
 
-	if (!$auth->isAdmin())
+		if (!$auth->isAdmin())
+		{
+			$app->response->setStatus(400);
+		}
+
+	});
+}
+
+// Unauthorized user routes
+if (!$auth->isUser())
+{
+
+	$app->map('/', function () use ($app)
 	{
-		$app->response->setStatus(400);
-	}
-
-});
+		$app->response->setStatus(401);
+		echo('You are not authorized to access');
+	})->via('GET', 'POST');
+}
 
 $app->run();

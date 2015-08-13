@@ -55,7 +55,7 @@ class Authenticate
 			else
 			{
 				$this->app->response->setStatus(200);
-				echo "Welcome to the Slim API.";
+				return true;
 			}
 
 		} catch (\PDOException $e)
