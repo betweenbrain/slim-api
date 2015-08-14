@@ -15,9 +15,10 @@ $app = new \Slim\Slim();
 
 // Implement user authentication as middleware using Slim's 'slim.before.router' hook
 $app->add(new \Slimapi\Access\Authenticate());
-$helper = new \Slimapi\Database\Helper();
-$db     = $helper->getDb();
 
+/**
+ * Application routes
+ */
 $app->get('/', function () use ($app)
 {
 	$app->response->setStatus(200);
@@ -41,4 +42,5 @@ $app->post('/user/', function () use ($app, $auth)
 
 });
 
+// Execute the application
 $app->run();
