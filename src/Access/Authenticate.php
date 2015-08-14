@@ -45,7 +45,7 @@ class Authenticate extends \Slim\Middleware
 				}
 			} catch (\PDOException $e)
 			{
-				$this->app->halt(404, sprintf('Authentication error: %s', $e->getMessage()));
+				$this->app->halt(404, sprintf('Database error: %s', $e->getMessage()));
 			}
 		};
 
