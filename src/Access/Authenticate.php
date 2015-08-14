@@ -21,7 +21,7 @@ class Authenticate extends \Slim\Middleware
 	public function call()
 	{
 
-		$isAuthorized = function ()
+		$isUser = function ()
 		{
 			try
 			{
@@ -49,7 +49,7 @@ class Authenticate extends \Slim\Middleware
 			}
 		};
 
-		$this->app->hook('slim.before.dispatch', $isAuthorized);
+		$this->app->hook('slim.before.dispatch', $isUser);
 		$this->next->call();
 	}
 }
