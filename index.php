@@ -11,47 +11,34 @@ require 'src/autoload.php';
  * License    GNU GPL v2 or later
  */
 
-$app    = new \Slim\Slim();
+$app = new \Slim\Slim();
+
+// Implement user authentication as middleware using Slim's 'slim.before.router' hook
+$app->add(new \Slimapi\Access\Authenticate());
 $helper = new \Slimapi\Database\Helper();
-$auth   = new \Slimapi\Access\Authenticate($app);
 $db     = $helper->getDb();
 
-// Only authorized users can access these routes
-if ($auth->isUser())
+$app->get('/', function () use ($app)
 {
-	$app->get('/', function () use ($auth)
-	{
-		$auth->isUser();
-	});
+	$app->response->setStatus(200);
+});
 
-	$app->post('/user/', function () use ($app, $auth)
-	{
-
-		if ($auth->isAdmin())
-		{
-			if ($auth->user())
-			{
-				$app->response->setStatus(201);
-			}
-		}
-
-		if (!$auth->isAdmin())
-		{
-			$app->response->setStatus(400);
-		}
-
-	});
-}
-
-// Unauthorized user routes
-if (!$auth->isUser())
+$app->post('/user/', function () use ($app, $auth)
 {
 
-	$app->map('/', function () use ($app)
+	if ($auth->isAdmin())
 	{
-		$app->response->setStatus(401);
-		echo('You are not authorized to access');
-	})->via('GET', 'POST');
-}
+		if ($auth->user())
+		{
+			$app->response->setStatus(201);
+		}
+	}
+
+	if (!$auth->isAdmin())
+	{
+		$app->response->setStatus(400);
+	}
+
+});
 
 $app->run();
