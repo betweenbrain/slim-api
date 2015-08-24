@@ -14,31 +14,45 @@ require 'src/autoload.php';
 $app = new \Slim\Slim();
 
 // Implement user authentication as middleware using Slim's 'slim.before.router' hook
-$app->add(new \Slimapi\Access\Authenticate());
+$app->add(new \Slimapi\Access\Authenticate(array(
+			"/"     => array(
+				"admin"   => "password",
+				"manager" => "password",
+				"user"    => "password"
+			),
+			"/user" => array(
+				"GET"  => array(
+					"admin"   => "password",
+					"manager" => "password"
+				),
+				"POST" => array(
+					"admin" => "password"
+				)
+			)
+		)
+	)
+);
 
 /**
  * Application routes
  */
 $app->get('/', function () use ($app)
 {
-	$app->response->setStatus(200);
+
 });
 
-$app->post('/user/', function () use ($app, $auth)
+$app->get('/guest', function () use ($app)
+{
+	$app->response->write('Welcome guest!');
+});
+
+$app->get('/user/', function () use ($app)
 {
 
-	if ($auth->isAdmin())
-	{
-		if ($auth->user())
-		{
-			$app->response->setStatus(201);
-		}
-	}
+});
 
-	if (!$auth->isAdmin())
-	{
-		$app->response->setStatus(400);
-	}
+$app->post('/user/', function () use ($app)
+{
 
 });
 
