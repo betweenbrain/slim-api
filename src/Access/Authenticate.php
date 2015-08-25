@@ -55,7 +55,7 @@ class Authenticate extends \Slim\Middleware
 					}
 
 					// Default response for authenticated routes
-					$this->app->response->status(403);
+					$this->app->response->status(401);
 				}
 			}
 		}
