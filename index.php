@@ -36,10 +36,7 @@ $app->add(new \Slimapi\Access\Authenticate(array(
 /**
  * Application routes
  */
-$app->get('/', function () use ($app)
-{
-
-});
+$app->get('/', 'userGreeting');
 
 $app->get('/guest', function () use ($app)
 {
@@ -58,3 +55,17 @@ $app->post('/user/', function () use ($app)
 
 // Execute the application
 $app->run();
+
+function userGreeting()
+{
+	$app = \Slim\Slim::getInstance();
+	if ($app->response->getStatus() == '200')
+	{
+		$app->response->write('Welcome user!');
+	}
+
+	if ($app->response->getStatus() != '200')
+	{
+		$app->response->write('Nothing to see here. Move along.');
+	}
+};
