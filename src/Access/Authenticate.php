@@ -37,6 +37,7 @@ class Authenticate extends \Slim\Middleware
 				// Check for and set user credentials first as we're in an authenticated route
 				if ($this->setCredentials())
 				{
+					// Check authentication for the current route
 					foreach ($this->options[$route] as $option => $value)
 					{
 						// HTTP request method specific authentication
@@ -56,7 +57,7 @@ class Authenticate extends \Slim\Middleware
 							break;
 						}
 
-						// Default response for authenticated routes
+						// Default response for authenticated routes (user hasn't authenticated)
 						$this->app->halt(403, 'Invalid credentials.');
 					}
 				}
