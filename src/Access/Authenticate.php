@@ -27,38 +27,44 @@ class Authenticate extends \Slim\Middleware
 	public function call()
 	{
 
-		$route = $this->app->request->getResourceUri();
-
-		// Authenticate only specified routes
-		if (array_key_exists($route, $this->options))
+		$isAuthorized = function ()
 		{
-			// Check for and set user credentials first as we're in an authenticated route
-			if ($this->setCredentials())
+			$route = $this->app->request->getResourceUri();
+
+			// Authenticate only specified routes
+			if (array_key_exists($route, $this->options))
 			{
-				foreach ($this->options[$route] as $option => $value)
+				// Check for and set user credentials first as we're in an authenticated route
+				if ($this->setCredentials())
 				{
-					// HTTP request method specific authentication
-					if (in_array($option, array('GET', 'PUT', 'POST', 'DELETE')) && $option == $this->app->request->getMethod())
+					foreach ($this->options[$route] as $option => $value)
 					{
-						if ($this->authenticate($value))
+						// HTTP request method specific authentication
+						if (in_array($option, array('GET', 'PUT', 'POST', 'DELETE')) && $option == $this->app->request->getMethod())
+						{
+							if ($this->authenticate($value))
+							{
+								// User has authenticated
+								break;
+							}
+						}
+
+						// Non-http request specific authentication
+						if ($this->authenticate($this->options[$route]))
 						{
 							// User has authenticated
 							break;
 						}
-					}
 
-					// Non-http request specific authentication
-					if ($this->authenticate($this->options[$route]))
-					{
-						// User has authenticated
-						break;
+						// Default response for authenticated routes
+						$this->app->halt(403, 'Invalid credentials.');
 					}
-
-					// Default response for authenticated routes
-					$this->app->response->status(401);
 				}
 			}
-		}
+		};
+
+		// Execute middleware with application hook to be able call Slim instance methods like halt()
+		$this->app->hook('slim.before.dispatch', $isAuthorized);
 
 		// Non-authenticated routes aren't checked
 		$this->next->call();
@@ -92,7 +98,7 @@ class Authenticate extends \Slim\Middleware
 		if (is_null($this->username))
 		{
 			$this->app->response->header('WWW-Authenticate: Basic realm="My Realm"');
-			$this->app->response->status(401);
+			$this->app->halt(403, 'Authorization required.');
 
 			return false;
 		}

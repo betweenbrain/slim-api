@@ -13,7 +13,7 @@ require 'src/autoload.php';
 
 $app = new \Slim\Slim();
 
-// Implement user authentication as middleware using Slim's 'slim.before.router' hook
+// Implement user authentication as middleware using Slim's 'slim.before.dispatch' hook
 $app->add(new \Slimapi\Access\Authenticate(array(
 			"/"     => array(
 				"admin"   => "password",
@@ -59,13 +59,5 @@ $app->run();
 function userGreeting()
 {
 	$app = \Slim\Slim::getInstance();
-	if ($app->response->getStatus() == '200')
-	{
-		$app->response->write('Welcome user!');
-	}
-
-	if ($app->response->getStatus() != '200')
-	{
-		$app->response->write('Nothing to see here. Move along.');
-	}
+	$app->response->write('Welcome user!');
 };
